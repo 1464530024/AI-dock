@@ -1,0 +1,17 @@
+# 统一换行符，避免 Windows 上 checkout 出来的 gradlew 在 Linux/macOS 下跑不了
+* text=auto eol=lf
+
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+gradlew text eol=lf
+
+# 二进制，禁止任何换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.jar binary
+*.jks binary
+*.apk binary
+*.ttf binary
+*.webp binary

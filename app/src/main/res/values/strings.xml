@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI dock</string>
+    <string name="drawer_open">打开助手列表</string>
+    <string name="refresh">刷新</string>
+    <string name="more">更多</string>
+</resources>

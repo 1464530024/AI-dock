@@ -1,0 +1,156 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1200px; font-family: "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+    background: #FFFFFF; color: #12131A; padding: 40px 44px 44px;
+  }
+  .head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .head h1 { font-size: 26px; font-weight: 700; letter-spacing: -.2px; }
+  .head span { font-size: 14px; color: #8A90A2; }
+  .rule { height: 1px; background: linear-gradient(90deg,#D8DEEA, rgba(216,222,234,0)); margin: 16px 0 26px; }
+
+  .layer { display: flex; gap: 18px; align-items: stretch; }
+  .tag {
+    flex: 0 0 128px; border-radius: 12px; padding: 12px 14px;
+    background: #F5F7FB; border: 1px solid #E5E9F2;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  }
+  .tag .t { font-size: 13px; font-weight: 700; color: #1B1E28; }
+  .tag .s { font-size: 11px; color: #7B8298; line-height: 1.35; }
+  .tag.blue { background: #EEF3FE; border-color: #D3E0FB; }
+  .tag.blue .t { color: #1B4BC4; }
+  .tag.green { background: #EDF7F3; border-color: #CFEADF; }
+  .tag.green .t { color: #0B7A4B; }
+  .tag.amber { background: #FFF7EC; border-color: #F5E3C6; }
+  .tag.amber .t { color: #9A5B00; }
+
+  .boxes { flex: 1 1 auto; display: flex; gap: 12px; }
+  .box {
+    flex: 1 1 0; min-width: 0; border-radius: 12px; padding: 12px 14px;
+    background: #fff; border: 1px solid #E5E9F2;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  .box .n { font-size: 13px; font-weight: 700; color: #1B1E28; letter-spacing: .1px; }
+  .box .d { margin-top: 6px; font-size: 11.5px; line-height: 1.55; color: #5C6478; }
+  .box .d i { font-style: normal; color: #2B5CE6; font-weight: 600; }
+  .box.wide { flex: 1.55 1 0; }
+  .box.dark { background: #16181F; border-color: #16181F; }
+  .box.dark .n { color: #F2F4F8; }
+  .box.dark .d { color: #A7AFC2; }
+  .box.dark .d i { color: #8FB0FF; }
+
+  .flow { display: flex; align-items: center; gap: 10px; padding: 10px 0 10px 146px; }
+  .flow .line { width: 2px; height: 18px; background: #DDE3EE; }
+  .flow .lbl { font-size: 11px; color: #98A0B2; letter-spacing: .3px; }
+
+  .foot { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill {
+    font-size: 11.5px; color: #3A4256; background: #F7F8FC;
+    border: 1px solid #E5E9F2; border-radius: 999px; padding: 6px 13px;
+  }
+  .pill b { font-weight: 600; color: #1B1E28; }
+</style></head>
+<body>
+
+<div class="head">
+  <h1>AI dock 架构</h1>
+  <span>单 Activity · 单 WebView 实例 · 无网络后端</span>
+</div>
+<div class="rule"></div>
+
+<div class="layer">
+  <div class="tag blue">
+    <div class="t">UI 层</div>
+    <div class="s">Jetpack Compose<br>Material 3</div>
+  </div>
+  <div class="boxes">
+    <div class="box wide">
+      <div class="n">AiDockApp</div>
+      <div class="d">CenterAlignedTopAppBar：LOGO + 双行标题 + 刷新 / 导出 / 浏览器<br>ModalNavigationDrawer 按 <i>国内 8 / 国外 4</i> 分组</div>
+    </div>
+    <div class="box">
+      <div class="n">SettingsScreen</div>
+      <div class="d">账号保险箱 · 二次验证开关<br>位数切换 / 清除站点数据</div>
+    </div>
+    <div class="box">
+      <div class="n">PinDialogs</div>
+      <div class="d">4 / 6 位自绘数字键<br>不唤起输入法</div>
+    </div>
+  </div>
+</div>
+
+<div class="flow"><div class="line"></div><div class="lbl">状态订阅 · Compose State</div></div>
+
+<div class="layer">
+  <div class="tag">
+    <div class="t">会话与持久化</div>
+    <div class="s">进程内 + 磁盘<br>密钥不出设备</div>
+  </div>
+  <div class="boxes">
+    <div class="box wide">
+      <div class="n">WebViewHolder</div>
+      <div class="d">全局唯一 WebView 实例<br>每个助手一份 <i>saveState / restoreState</i>，切换不丢滚动位置与输入<br>CookieManager 落盘 · UA 抹掉 <i>; wv</i> 规避内嵌浏览器拦截</div>
+    </div>
+    <div class="box">
+      <div class="n">Prefs</div>
+      <div class="d">DataStore<br>记住上次选中的助手</div>
+    </div>
+    <div class="box">
+      <div class="n">AccountVault</div>
+      <div class="d"><i>AES-256-GCM</i> 加密密码<br>密钥存 AndroidKeyStore<br>验证码只存加盐摘要</div>
+    </div>
+  </div>
+</div>
+
+<div class="flow"><div class="line"></div><div class="lbl">evaluateJavascript 注入 · 读取已渲染 DOM</div></div>
+
+<div class="layer">
+  <div class="tag amber">
+    <div class="t">导出链路</div>
+    <div class="s">页面 → Markdown<br>三层降级</div>
+  </div>
+  <div class="boxes">
+    <div class="box">
+      <div class="n">① 站点适配器</div>
+      <div class="d">10 个站点各用稳定选择器<br>ChatGPT / Gemini / Claude / Copilot / DeepSeek / Kimi / 豆包 / 千问 / 元宝</div>
+    </div>
+    <div class="box">
+      <div class="n">② 通用启发式</div>
+      <div class="d">挑「子节点最多、文本最规整」的容器<br>按属性 / 对齐 / 头像交替判角色</div>
+    </div>
+    <div class="box">
+      <div class="n">③ 整页兜底</div>
+      <div class="d">可见文本整体成文<br>保证任何站点都能导出</div>
+    </div>
+    <div class="box">
+      <div class="n">ExportSaver</div>
+      <div class="d">MediaStore 写「下载/AI dock」<br>FileProvider 分享 · 剪贴板复制</div>
+    </div>
+  </div>
+</div>
+
+<div class="flow"><div class="line"></div><div class="lbl">构建</div></div>
+
+<div class="layer">
+  <div class="tag green">
+    <div class="t">构建链</div>
+    <div class="s">命令行可复现<br>无需 Android Studio</div>
+  </div>
+  <div class="boxes">
+    <div class="box dark">
+      <div class="n">JDK 17 · Gradle 8.2.1 · AGP 8.2.1 · Kotlin 1.9.22</div>
+      <div class="d">Compose 编译器 1.5.8 · Compose BOM 2024.02.01 · compileSdk 34 · <i>minSdk 24 / targetSdk 34</i><br>签名从 keystore.properties 读取，缺失时自动降级 debug 签名</div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <span class="pill"><b>12</b> 个助手</span>
+  <span class="pill">零第三方 SDK</span>
+  <span class="pill">零埋点 · 零联网上报</span>
+  <span class="pill">APK <b>6.5 MB</b></span>
+  <span class="pill">文件 <b>13</b> 个 Kotlin 源</span>
+</div>
+
+</body></html>

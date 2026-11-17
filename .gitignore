@@ -1,0 +1,34 @@
+# ---------------- Android / Gradle ----------------
+.gradle/
+build/
+app/build/
+captures/
+*.iml
+.idea/
+.cxx/
+.externalNativeBuild/
+
+# 本机 SDK 路径，含用户名，绝对不能提交
+local.properties
+
+# ---------------- 签名 ----------------
+# 只有 *.example 会进仓库，真实密钥与口令保留在本机
+keystore/*.jks
+keystore/*.keystore
+keystore/keystore.properties
+
+# ---------------- 编译与工具产物 ----------------
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.log
+*.hprof
+
+# ---------------- 交付物 ----------------
+# APK 走 GitHub Releases，真机截图与展示页只在本机，仓库只留源码与文档
+dist/
+
+# ---------------- 系统 ----------------
+.DS_Store
+Thumbs.db
+desktop.ini

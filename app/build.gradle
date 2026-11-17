@@ -1,0 +1,106 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+
+/*
+ * 签名配置从 keystore/keystore.properties 读取（该文件不进仓库）。
+ * 没有这个文件时 —— 比如刚 clone 下来 —— 自动降级成 debug 签名，
+ * 保证「任何人 clone 下来都能直接编译出可安装的 APK」。
+ */
+def keystorePropsFile = rootProject.file('keystore/keystore.properties')
+def keystoreProps = new Properties()
+def releaseKeystoreFile = null
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+    def name = keystoreProps.getProperty('storeFile', 'aidock-release.jks')
+    def candidate = rootProject.file("keystore/${name}")
+    if (candidate.exists()) releaseKeystoreFile = candidate
+}
+def hasReleaseKeystore = releaseKeystoreFile != null
+
+android {
+    namespace 'com.aidock.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.aidock.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 4
+        versionName "1.2.0"
+        resourceConfigurations += ["zh", "en"]
+    }
+
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            release {
+                storeFile releaseKeystoreFile
+                storePassword keystoreProps.getProperty('storePassword')
+                keyAlias keystoreProps.getProperty('keyAlias')
+                keyPassword keystoreProps.getProperty('keyPassword')
+                v1SigningEnabled true
+                v2SigningEnabled true
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            // 没配密钥时用 debug 签名，产物仍可安装，便于贡献者本地验证
+            signingConfig hasReleaseKeystore ? signingConfigs.release : signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+        freeCompilerArgs += ["-Xjvm-default=all"]
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+
+    composeOptions {
+        // Kotlin 1.9.22 对应的稳定 Compose 编译器
+        kotlinCompilerExtensionVersion "1.5.8"
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['/META-INF/{AL2.0,LGPL2.1}', '/META-INF/DEPENDENCIES', 'META-INF/INDEX.LIST']
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    implementation platform('androidx.compose:compose-bom:2024.02.01')
+
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.activity:activity-compose:1.8.2'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.foundation:foundation'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-core'
+
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+}
